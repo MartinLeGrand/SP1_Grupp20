@@ -6,7 +6,7 @@
 <pre>
 |-- DiceGame
     |-- Assets
-    |   |-- Project
+    |   |-- Content
     |   |   |-- Art
     |   |   |   |-- Character
     |   |   |   |-- Environmental
@@ -21,14 +21,13 @@
     |   |   |-- Effects
     |   |   |   |-- Explosions
     |   |   |   |-- Fire
-    |   |   |   |-- Weather
+    |   |   |   |-- Dust
     |   |   |-- Scenes
     |   |   |-- Materials
     |   |   |   |-- Debug
-    |   |   |   |-- Metal
-    |   |   |   |-- Paint
-    |   |   |   |-- Utility
-    |   |   |   |-- Weathering
+    |   |   |   |-- Table
+    |   |   |   |-- Revolver
+    |   |   |   |-- Dealer
     |   |   |-- Placeables
     |   |   |   |-- Interactive
     |   |   |   |-- Physics
