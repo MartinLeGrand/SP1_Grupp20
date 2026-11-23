@@ -1,7 +1,8 @@
 # SP1_Grupp20
 
-<a name="2e1"><a>
-### 2e1 Example Project Content Structure
+<a name="Projekt Struktur"><a>
+## Projekt Struktur
+### MÅSTE FÖLJAS
 <pre>
 |-- DiceGame
     |-- Assets
