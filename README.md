@@ -4,7 +4,7 @@
 ## Projekt Struktur
 ### MÅSTE FÖLJAS
 <pre>
-|-- DiceGame
+|-- SP1_Grupp20
     |-- Assets
     |   |-- Content
     |   |   |-- Art
