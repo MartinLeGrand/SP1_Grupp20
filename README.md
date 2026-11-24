@@ -28,7 +28,7 @@
     |   |   |   |-- Table
     |   |   |   |-- Revolver
     |   |   |   |-- Dealer
-    |   |   |-- Placeables
+    |   |   |-- Prefabs
     |   |   |   |-- Interactive
     |   |   |   |-- Physics
     |   |   |   |-- Special
