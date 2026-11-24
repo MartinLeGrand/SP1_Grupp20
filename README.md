@@ -12,7 +12,7 @@
     |   |   |   |-- Environmental
     |   |   |-- Audio
     |   |   |   |-- Music
-    |   |   |   |-- SFX
+    |   |   |   |-- Sounds
     |   |   |   |-- Mixers
     |   |   |-- Core
     |   |   |   |-- Dialogue
