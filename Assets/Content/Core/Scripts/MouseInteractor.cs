@@ -3,11 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public interface IInteractable
+{
+    void OnInteract(InputAction.CallbackContext context);
+}
+
 public class MouseInteractor : MonoBehaviour
 {
     private Camera _camera;
     private Rigidbody _rigidbody;
-    private ConfigurableJoint _configurableJoint;
+    private IInteractable _activeInteractable;
+    private Vector3 _mouseWorldPosition;
     
     [Header("Interaction Settings")]
     public bool followMouse = true;
@@ -20,7 +26,6 @@ public class MouseInteractor : MonoBehaviour
     {
         _camera = Camera.main;
         _rigidbody = GetComponent<Rigidbody>();
-        _configurableJoint = GetComponent<ConfigurableJoint>();
     }
 
     void Update()
@@ -31,36 +36,29 @@ public class MouseInteractor : MonoBehaviour
     void FixedUpdate()
     {
         SetInteractionSpherePosition();
-
     }
     
-    public void OnInteract(InputAction.CallbackContext context)
+    public void OnLeftClick(InputAction.CallbackContext context)
     {
-        if (context.phase != InputActionPhase.Started)
+        if (context.started)
         {
-            return;
-        }
+            _activeInteractable = null;
 
-        if (_configurableJoint.connectedBody != null)
+            if (currentInteractable != null && currentInteractable.TryGetComponent<IInteractable>(out var interactable))
+            {
+                _activeInteractable = interactable;
+                _activeInteractable.OnInteract(context);
+            }
+        }
+        else if (context.performed)
         {
-            _configurableJoint.connectedBody = null;
-            Debug.Log("Dropped object.");
-            return;
+            _activeInteractable?.OnInteract(context);
         }
-        
-        if (currentInteractable == null)
+        else if (context.canceled)
         {
-            return;
+            _activeInteractable?.OnInteract(context);
+            _activeInteractable = null;
         }
-
-        //if (!currentInteractable.TryGetComponent<Rigidbody>(out var rb))
-        //{
-        //    Debug.LogWarning($"Candidate '{currentInteractable.name}' has no Rigidbody.", currentInteractable);
-        //    return;
-        //}
-
-        _configurableJoint.connectedBody = currentInteractable.GetComponent<Rigidbody>();
-        Debug.Log($"Picked up {currentInteractable.name}", currentInteractable);
     }
 
     Vector3 GetMouseWorldPosition()
@@ -70,9 +68,9 @@ public class MouseInteractor : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit,  Mathf.Infinity, mouseBlockLayer))
         {
-            return hit.point;
+            _mouseWorldPosition = hit.point;
         }
-        return Vector3.zero;
+        return _mouseWorldPosition;
     }
     
     void SetInteractionSpherePosition()

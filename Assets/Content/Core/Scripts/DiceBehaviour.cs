@@ -1,10 +1,11 @@
 using System;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Debug = UnityEngine.Debug;
 
 [RequireComponent(typeof(Rigidbody))]
-public class DiceBehaviour : MonoBehaviour
+public class DiceBehaviour : MonoBehaviour, IInteractable
 {
     [Serializable]
     public struct DieFaces
@@ -24,12 +25,33 @@ public class DiceBehaviour : MonoBehaviour
         new DieFaces {value = 4, localNormal = Vector3.back}
     };
 
+    private MouseInteractor _mouseInteractor;
+    private PickupScript _pickupScript;
+    
     private Rigidbody _rb;
     public int topFaceValue = -1;
 
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        
+        //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
+        _mouseInteractor = FindFirstObjectByType<MouseInteractor>();
+        _pickupScript = FindFirstObjectByType<PickupScript>();
+    }
+
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            TossDice(UnityEngine.Random.Range(2f, 4f), UnityEngine.Random.Range(5f, 10f));
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log(GetTopFaceValue());
+        }
     }
 
     public int GetTopFaceValue()
@@ -49,18 +71,21 @@ public class DiceBehaviour : MonoBehaviour
         return currentTopFaceValue;
     }
 
-    private void Update()
+    void IInteractable.OnInteract(InputAction.CallbackContext context)
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        Debug.Log(GetTopFaceValue());
+        if (context.performed)
         {
-            TossDice(UnityEngine.Random.Range(2f, 4f), UnityEngine.Random.Range(5f, 10f));
+            _pickupScript.Pickup(gameObject);
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (context.canceled)
         {
-            Debug.Log(GetTopFaceValue());
+            _pickupScript.Drop(gameObject);
         }
     }
+    
+    //Debug function that tosses the dice up to randomize the value somewhat
     public void TossDice(float forceMagnitude, float torqueMagnitude)
     {
         _rb.AddForce(Vector3.up * forceMagnitude, ForceMode.Impulse);
