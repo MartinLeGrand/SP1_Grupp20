@@ -51,18 +51,14 @@ public class DiceBehaviour : MonoBehaviour
 
     private void Update()
     {
-        if (_rb.IsSleeping())
-        {
-            topFaceValue = GetTopFaceValue();
-        }
-        else
-        {
-            topFaceValue = -1;
-            Debug.LogError("Die wasn't sleeping this frame, set value to -1.");
-        }
         if (Input.GetKeyDown(KeyCode.T))
         {
             TossDice(UnityEngine.Random.Range(2f, 4f), UnityEngine.Random.Range(5f, 10f));
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log(GetTopFaceValue());
         }
     }
     public void TossDice(float forceMagnitude, float torqueMagnitude)
