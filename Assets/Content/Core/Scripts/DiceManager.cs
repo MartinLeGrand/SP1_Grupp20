@@ -6,12 +6,12 @@ public class DiceManager : MonoBehaviour
 {   
     List<GameObject> allObjects = new List<GameObject>();
     private DiceBehaviour _diceBehaviour;
-    private TargetScore _targetScore;
+    private TargetManager _targetScore;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // should ever only exist one Dicemanager
-        _targetScore = FindFirstObjectByType<TargetScore>();
+        _targetScore = FindFirstObjectByType<TargetManager>();
     }
 
     public void CountTotal()
