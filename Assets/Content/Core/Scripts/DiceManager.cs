@@ -14,16 +14,7 @@ public class DiceManager : MonoBehaviour
     DiceBehaviour diceBehaviour;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
-    {
-        // only checks for gameobject at the start for now
-        allObjects = GetAllSceneObjects();
-        //goes through the list and writes the name of the game object
-        foreach (GameObject go in allObjects)
-        {
-            Debug.Log(go.name);
-        
-        }
-    }
+    { }
 
     void Update()
     {
@@ -37,6 +28,18 @@ public class DiceManager : MonoBehaviour
         }
     }
 
+    public void AddDice(GameObject go)
+    {
+        allObjects.Add(go);
+        Debug.Log("Dice added: " + go.name);
+    }
+
+    public void RemoveDice(GameObject go)
+    {
+        
+    }
+    
+    /*
     List<GameObject> GetAllSceneObjects()
     {
         List<GameObject> objectsInScene = new List<GameObject>();
@@ -56,4 +59,5 @@ public class DiceManager : MonoBehaviour
 
         return objectsInScene;
     }
+    */
 }

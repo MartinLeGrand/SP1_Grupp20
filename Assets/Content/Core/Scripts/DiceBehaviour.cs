@@ -14,6 +14,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         public Vector3 localNormal;
     }
 
+    [SerializeField] 
+    private GameObject manager;
+    private DiceManager _diceManager;
+    
     [SerializeField]
     private DieFaces[] faces = new DieFaces[]
     {
@@ -34,6 +38,9 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+
+         _diceManager = manager.GetComponent<DiceManager>();
+         _diceManager.AddDice(gameObject);
         
         //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
         _mouseInteractor = FindFirstObjectByType<MouseInteractor>();
