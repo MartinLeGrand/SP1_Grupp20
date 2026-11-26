@@ -346,6 +346,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2292545823756812664, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
+      propertyPath: manager
+      value: 
+      objectReference: {fileID: 1471762504}
     - target: {fileID: 5298096824637984439, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -594,6 +598,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2292545823756812664, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
+      propertyPath: manager
+      value: 
+      objectReference: {fileID: 1471762504}
     - target: {fileID: 5298096824637984439, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.215
@@ -651,6 +659,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2292545823756812664, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
+      propertyPath: manager
+      value: 
+      objectReference: {fileID: 1471762504}
     - target: {fileID: 5298096824637984439, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -752,6 +764,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2292545823756812664, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
+      propertyPath: manager
+      value: 
+      objectReference: {fileID: 1471762504}
     - target: {fileID: 5298096824637984439, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -809,6 +825,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2292545823756812664, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
+      propertyPath: manager
+      value: 
+      objectReference: {fileID: 1471762504}
     - target: {fileID: 5298096824637984439, guid: b1a15bbeae1abfa5ebbb6ea047e84c8d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.068
