@@ -31,7 +31,7 @@ public class TargetScore : MonoBehaviour
 
     public void AddToDiceTotal(int total)
     {
-        _diceTotal += total;
+        _diceTotal = total;
         diceTotalText.text = "have: " + _diceTotal.ToString();
     }
     
