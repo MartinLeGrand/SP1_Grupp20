@@ -37,9 +37,23 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     [SerializeField] private AudioClip[] throwAudioClips;
     
     [Range(0f, 3f)]
-    [SerializeField] private float randomPitchLow =  0.5f;
+    [SerializeField] private float minPitch =  0.5f;
     [Range(0f, 3f)]
-    [SerializeField] private float randomPitchHigh = 1f;
+    [SerializeField] private float maxPitch = 1f;
+    
+    [Tooltip("This speed maps to the volume below, at minImpactSpeed the audio will be minVolume, at maxImpactSpeed the audio will be maxVolume.")]
+    [Range(0f, 0.5f)]
+    [SerializeField] private float minImpactSpeed = 0.5f;
+    [Tooltip("This speed maps to the volume below, at minImpactSpeed the audio will be minVolume, at maxImpactSpeed the audio will be maxVolume.")]
+    [Range(0f, 10f)]
+    [SerializeField] private float maxImpactSpeed = 8f;
+    
+    [Tooltip("THIS IS NOT A RANDOM VOLUME, This changes the volume of the audio based on impact speed.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float minVolume = 0.05f;
+    [Tooltip("THIS IS NOT A RANDOM VOLUME, This changes the volume of the audio based on impact speed.")]
+    [Range(0f, 2f)]
+    [SerializeField] private float maxVolume = 1f;
     
     [SerializeField] private float minSoundInterval = 0.05f;
 
@@ -100,6 +114,16 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     
     private void OnCollisionEnter(Collision collision)
     {
+        float impactSpeed = collision.relativeVelocity.magnitude;
+        
+        // If collision speed is too low, we do nothing.
+        // THIS IS SAFE AS LONG AS COLLISIONS ARE ONLY USED FOR AUDIO
+        if (impactSpeed < minImpactSpeed)
+            return;
+        
+        float normalizedSpeed = Mathf.InverseLerp(minImpactSpeed, maxImpactSpeed, impactSpeed);
+        float volume = Mathf.Lerp(minVolume, maxVolume, normalizedSpeed);
+        
         PhysicsMaterial hitMat = collision.collider.sharedMaterial;
 
         if (hitMat == diceMaterial)
@@ -116,7 +140,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
                 return;
 
             _lastDieSoundTime = Time.time;
-            PlayRandomClip(collisionAudioDieOnDie);
+            PlayRandomClip(collisionAudioDieOnDie, volume);
         }
         else if (hitMat == tableMaterial)
         {
@@ -124,18 +148,19 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
                 return;
 
             _lastDieSoundTime = Time.time;
-            PlayRandomClip(collisionAudioDieOnTable);
+            PlayRandomClip(collisionAudioDieOnTable, volume);
         }
     }
 
     // Helper function to get random audio clip from an array
-    private void PlayRandomClip(AudioClip[] clips)
+    private void PlayRandomClip(AudioClip[] clips, float volume)
     {
         if (clips == null || clips.Length == 0)
             return;
         
-        _audioSource.pitch = Random.Range(randomPitchLow, randomPitchHigh);
-        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
+        _audioSource.pitch = Random.Range(minPitch, maxPitch);
+        
+        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
     }
 
     public int GetTopFaceValue()
@@ -191,7 +216,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         {
             _rb.rotation = UnityEngine.Random.rotation;
             _pickupScript.Drop(gameObject);
-            PlayRandomClip(throwAudioClips);
+            PlayRandomClip(throwAudioClips, 1);
             _isHeld = false;
         }
     }
