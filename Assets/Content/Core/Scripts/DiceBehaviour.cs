@@ -3,6 +3,7 @@ using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Rigidbody))]
 public class DiceBehaviour : MonoBehaviour, IInteractable
@@ -14,6 +15,11 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         public Vector3 localNormal;
     }
     
+    [Header("References")]
+    [SerializeField] private PhysicsMaterial diceMaterial;
+    [SerializeField] private PhysicsMaterial tableMaterial;
+    
+    [Header("Variables")]
     [SerializeField]
     private DieFaces[] faces = new DieFaces[]
     {
@@ -25,21 +31,38 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         new DieFaces {value = 4, localNormal = Vector3.back}
     };
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip[] collisionAudioDieOnDie;
+    [SerializeField] private AudioClip[] collisionAudioDieOnTable;
+    [SerializeField] private AudioClip[] throwAudioClips;
+    
+    [Range(0f, 3f)]
+    [SerializeField] private float randomPitchLow =  0.5f;
+    [Range(0f, 3f)]
+    [SerializeField] private float randomPitchHigh = 1f;
+    
+    [SerializeField] private float minSoundInterval = 0.05f;
+
+    [Header("Interaction rotation settings")]
+    [SerializeField] private float torqueOnMove = 0.25f;
+    [SerializeField] private float maxAngularSpeed = 12f;
+
     private MouseInteractor _mouseInteractor;
     private PickupScript _pickupScript;
-    
     private DiceManager _diceManager;
     
     private Rigidbody _rb;
-    public int topFaceValue = -1;
+    private AudioSource _audioSource;
+    [HideInInspector] public int topFaceValue = -1;
     private Boolean _isHeld = false;
+    private float _lastDieSoundTime = -10f;
 
-    [SerializeField] private float torqueOnMove = 0.1f;
-    [SerializeField] private float maxTorqueOnMove = 5f;
-
+    
+    
     private void Awake()
     {
         _rb = GetComponent<Rigidbody>();
+        _audioSource = GetComponent<AudioSource>();
 
         
         //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
@@ -74,6 +97,46 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     {
         AddSpin();
     }
+    
+    private void OnCollisionEnter(Collision collision)
+    {
+        PhysicsMaterial hitMat = collision.collider.sharedMaterial;
+
+        if (hitMat == diceMaterial)
+        {
+            if (collision.gameObject.TryGetComponent<DiceBehaviour>(out DiceBehaviour otherDie))
+            {
+                // Since we only want one die to play the audio we compare the unique instance ID's and play the sound on the higher one
+                if (GetInstanceID() < otherDie.GetInstanceID())
+                    return;
+            }
+
+            // Have less overlapping audio bits for when there is a bunch of collisions quickly
+            if (Time.time - _lastDieSoundTime < minSoundInterval)
+                return;
+
+            _lastDieSoundTime = Time.time;
+            PlayRandomClip(collisionAudioDieOnDie);
+        }
+        else if (hitMat == tableMaterial)
+        {
+            if (Time.time - _lastDieSoundTime < minSoundInterval)
+                return;
+
+            _lastDieSoundTime = Time.time;
+            PlayRandomClip(collisionAudioDieOnTable);
+        }
+    }
+
+    // Helper function to get random audio clip from an array
+    private void PlayRandomClip(AudioClip[] clips)
+    {
+        if (clips == null || clips.Length == 0)
+            return;
+        
+        _audioSource.pitch = Random.Range(randomPitchLow, randomPitchHigh);
+        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)]);
+    }
 
     public int GetTopFaceValue()
     {
@@ -95,16 +158,23 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     private void AddSpin()
     {
         if (!_isHeld || _rb.IsSleeping())
-        {
             return;
-        }
-        
-        Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0, _rb.linearVelocity.z);
 
-        if (_isHeld)
+        Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
+        float speed = flatVelocity.magnitude;
+
+        if (speed < 0.01f)
+            return;
+
+        Vector3 velocityRight = Vector3.Cross(Vector3.up, flatVelocity / speed).normalized;
+
+        // Scales linearly with horizontal speed (m/s)
+        _rb.AddTorque(velocityRight * (speed * torqueOnMove), ForceMode.Force);
+
+        // Cap maximum angular speed (rad/s)
+        if (_rb.angularVelocity.sqrMagnitude > maxAngularSpeed * maxAngularSpeed)
         {
-            Vector3 velocityRight = Vector3.Cross(new Vector3(0, 1, 0), _rb.linearVelocity.normalized).normalized;
-            _rb.AddTorque(velocityRight * torqueOnMove, ForceMode.Impulse);
+            _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularSpeed;
         }
     }
 
@@ -119,7 +189,9 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
 
         if (context.canceled)
         {
+            _rb.rotation = UnityEngine.Random.rotation;
             _pickupScript.Drop(gameObject);
+            PlayRandomClip(throwAudioClips);
             _isHeld = false;
         }
     }
