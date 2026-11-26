@@ -5,8 +5,9 @@ using UnityEngine.Events;
 // It contains methods that can be called from UnityEvents to change the value of the counter.
 public class TargetScore : MonoBehaviour
 {
-    [Tooltip("The Text component where the counter value should be shown")]
+    [Tooltip("The Text component where the target value should be shown")]
     [SerializeField] private TMPro.TMP_Text targetText;
+    [Tooltip("The Text component where the dice total value should be shown")]
     [SerializeField] private TMPro.TMP_Text diceTotalText;
 
     private int target = 0;
@@ -23,7 +24,7 @@ public class TargetScore : MonoBehaviour
 
     public void AddToDiceTotal(int total)
     {
-        diceTotal += total;
+        diceTotal = total;
         diceTotalText.text = "have: " + diceTotal.ToString();
     }
     

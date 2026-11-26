@@ -2,29 +2,29 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-// solution found in: https://discussions.unity.com/t/how-to-get-all-gameobjects-in-scene/53026/6
-// and: https://docs.unity.com/en-us/engine/6000.6/script-reference/unityengine/resources/findobjectsoftypeall
-
-// next checking https://discussions.unity.com/t/how-do-i-call-a-function-in-another-gameobjects-script/111
-// to see if i find a solution to call on the die's GetTopFaceValue function from the script DiceBehaviour.
-// found solution in the documentation of GetComponent
 public class DiceManager : MonoBehaviour
 {   
     List<GameObject> allObjects = new List<GameObject>();
-    DiceBehaviour diceBehaviour;
+    private DiceBehaviour _diceBehaviour;
+    private TargetScore _targetScore;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
-    { }
+    {
+        // should ever only exist one Dicemanager
+        _targetScore = FindFirstObjectByType<TargetScore>();
+    }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            int total = 0;
             foreach (GameObject go in allObjects)
             {
-                diceBehaviour = go.GetComponent<DiceBehaviour>();
-                Debug.Log(go.name + " dice value: " + diceBehaviour.GetTopFaceValue());
+                _diceBehaviour = go.GetComponent<DiceBehaviour>();
+                total += _diceBehaviour.GetTopFaceValue();
             }
+            _targetScore.AddToDiceTotal(total);
         }
     }
 
@@ -36,28 +36,8 @@ public class DiceManager : MonoBehaviour
 
     public void RemoveDice(GameObject go)
     {
-        
+        allObjects.Remove(go);
+        Debug.Log("Dice removed: " + go.name);
     }
     
-    /*
-    List<GameObject> GetAllSceneObjects()
-    {
-        List<GameObject> objectsInScene = new List<GameObject>();
-
-        // searched for each gameobject which is of the type GameObject and does a loop
-        foreach (GameObject go in Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[])
-        {
-            
-            // checks if the game object is in the scene and puts it in a list of gameobjects
-            // EditorUtility.IsPersistent is true for objects saved to disk as assets (such as prefabs).
-            // with ! on it, it ignores prefabs.
-            // for now also checks if the game object has the "Interactable" tag, as only dice have it now, there is no problem
-            if (!EditorUtility.IsPersistent(go.transform.root.gameObject) && !(go.hideFlags == HideFlags.NotEditable || 
-            go.hideFlags == HideFlags.HideAndDontSave) && go.tag == "Interactable")
-                objectsInScene.Add(go);
-        }
-
-        return objectsInScene;
-    }
-    */
 }
