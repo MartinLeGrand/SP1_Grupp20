@@ -176,10 +176,11 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6b485957829b63e4ca31647ebbb1ac28, type: 3}
   - {fileID: 8300000, guid: a5e79d056e12de9499525a077bbe217d, type: 3}
   collisionAudioDieOnTable:
-  - {fileID: 8300000, guid: 4581dd2de6b0f364fb64e98ba5e3e196, type: 3}
-  - {fileID: 8300000, guid: fcf76b0b950bc6c42b49f428e2c6ca60, type: 3}
-  - {fileID: 8300000, guid: 0b3d3d61f6011054f9c37e08e2254146, type: 3}
-  - {fileID: 8300000, guid: e1f297512a8c3044f892fe789eb97c7e, type: 3}
+  - {fileID: 8300000, guid: 1c220850732a0264184631c786346c78, type: 3}
+  - {fileID: 8300000, guid: 750ea976caee01049bc5f337c4113bee, type: 3}
+  - {fileID: 8300000, guid: 4f04138d7e9716e43b7026c699fa228b, type: 3}
+  - {fileID: 8300000, guid: 7f26b5af08677a3439de6e8717d63646, type: 3}
+  - {fileID: 8300000, guid: 3f8ff6a9aed96954b85fac4308351feb, type: 3}
   throwAudioClips:
   - {fileID: 8300000, guid: 6ed57cb69728159429eb0c266e425f83, type: 3}
   - {fileID: 8300000, guid: 6b47dc5d671f39e478bf6c2873d4760f, type: 3}
