@@ -1944,6 +1944,14 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -733.99426
       objectReference: {fileID: 0}
+    - target: {fileID: 2461067610143986654, guid: c4af00cfb97ef4102b20582e6a9bc8e1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1736184357}
+    - target: {fileID: 2461067610143986654, guid: c4af00cfb97ef4102b20582e6a9bc8e1, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: GenerateTarget
+      objectReference: {fileID: 0}
     - target: {fileID: 4671714150753089984, guid: c4af00cfb97ef4102b20582e6a9bc8e1, type: 3}
       propertyPath: m_Pivot.x
       value: 0
