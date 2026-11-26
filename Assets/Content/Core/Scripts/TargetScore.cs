@@ -25,7 +25,7 @@ public class TargetScore : MonoBehaviour
     // calls on setCounter when created
     public void Awake()
     {
-        SetCounter();
+        GenerateTarget(0);
         diceTotalText.text = "have: " + _diceTotal.ToString();
     }
 
@@ -36,7 +36,7 @@ public class TargetScore : MonoBehaviour
     }
     
     // SetCounter gives the counter a new value
-    public void SetCounter()
+    public void GenerateTarget(int difficulty)
     {   
         // rolls a random number between 1 and 10 and if its 10, sets the target type for on value
         if (Random.Range(_difficulty, 11) == 10)

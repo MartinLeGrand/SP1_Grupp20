@@ -14,20 +14,17 @@ public class DiceManager : MonoBehaviour
         _targetScore = FindFirstObjectByType<TargetScore>();
     }
 
-    void Update()
+    public void CountTotal()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        int total = 0;
+        foreach (GameObject go in allObjects)
         {
-            int total = 0;
-            foreach (GameObject go in allObjects)
-            {
-                _diceBehaviour = go.GetComponent<DiceBehaviour>();
-                total += _diceBehaviour.GetTopFaceValue();
-            }
-            _targetScore.AddToDiceTotal(total);
+            _diceBehaviour = go.GetComponent<DiceBehaviour>();
+            total += _diceBehaviour.GetTopFaceValue();
         }
+        _targetScore.AddToDiceTotal(total);
     }
-
+    
     public void AddDice(GameObject go)
     {
         allObjects.Add(go);
