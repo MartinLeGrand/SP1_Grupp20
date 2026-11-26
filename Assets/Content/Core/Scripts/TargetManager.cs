@@ -22,6 +22,7 @@ public class TargetManager : MonoBehaviour
     private int _targetType = 0;
 
     public UnityEvent onComparedAndTrue;
+    public UnityEvent onComparedAndFalse;
 
     // calls on setCounter when created
     public void Awake()
@@ -30,13 +31,13 @@ public class TargetManager : MonoBehaviour
         diceTotalText.text = "have: " + _diceTotal.ToString();
     }
 
-    public void AddToDiceTotal(int total)
+    public void AddToDiceTotal(int total) // adds the dice total to the counter
     {
         _diceTotal = total;
         diceTotalText.text = "have: " + _diceTotal.ToString();
     }
     
-    // SetCounter gives the counter a new value
+    // Generate a random target type of, below, above, get, between
     public void GenerateTarget(int difficulty)
     {
         _target.Clear();
@@ -67,21 +68,21 @@ public class TargetManager : MonoBehaviour
         */
     }
 
-    private void GetOnValue()
+    private void GetOnValue() // writes out the value needed
     {
         _target.Add(Random.Range(10,21));
         targetText.text = "get: " + _target[0].ToString();
         _targetType = 0;
     }
 
-    private void GetAboveValue()
+    private void GetAboveValue() // writes out the value needed
     {
         _target.Add(Random.Range(10,21));
         targetText.text = "get above: " + _target[0].ToString();
         _targetType = 2;
     }
 
-    private void GetBetweenTargets()
+    private void GetBetweenTargets() // writes out the value needed
     {   
         int firstTarget = Random.Range(10, 21);
         _target.Add(firstTarget);
@@ -90,7 +91,7 @@ public class TargetManager : MonoBehaviour
         _targetType = 3;
     }
     
-    private void GetBellowValue()
+    private void GetBellowValue() // writes out the value needed
     {
         _target.Add(Random.Range(10,21));
         targetText.text = "get below: " + _target[0].ToString();
@@ -166,6 +167,10 @@ public class TargetManager : MonoBehaviour
         if (hit)
         {
             onComparedAndTrue.Invoke();
+        }
+        else // invoke if its false
+        {
+            onComparedAndFalse.Invoke();
         }
     }
 }

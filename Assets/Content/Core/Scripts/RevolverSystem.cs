@@ -1,55 +1,56 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
 public class RevolverSystem : MonoBehaviour
 {
-    private Queue<int> chamber = new Queue<int>();
-    private int CheatAttempts;
+    private int totalBullets;
 
     public UnityEvent OnBlank;
     public UnityEvent OnShot;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    public void LoadRevolver() // loads the revolver with a shot
     {
-        LoadRevolver();
+        totalBullets++;
+        totalBullets = Math.Min(6, totalBullets);
+        Debug.Log("total bullets: " + totalBullets);
     }
 
-    public void LoadRevolver()
-    {   
-        chamber.Clear();
-        Debug.Log("Loading revolver");
-        int bulletplace = Random.Range(0, 6);
-        for (int i = 0; i < 6; i++)
-        {
-            if (bulletplace == i)
-            {
-                chamber.Enqueue(1);
-            }
-            else
-            {
-                chamber.Enqueue(0);
-            }
-        }
-        show(chamber);
+    public void Cheating() // shoots then loads
+    {
+        Shoot();
+        LoadRevolver(); 
     }
 
-    public void Cheating()
+    public void RemoveShot() // removes a shot from the revolver
     {
-        
+        totalBullets--;
+        totalBullets = Math.Max(0, totalBullets);
+        Debug.Log("total bullets: " + totalBullets);
     }
-    
-    private void show(Queue<int> shows)
+
+    public void Shoot()
     {
-        foreach (var VARIABLE in shows)
+        int shooting = 0;
+        if (totalBullets != 0) // if total bullet count is not 0 it randomly rolls
         {
-            Debug.Log(VARIABLE);
+            shooting = Random.Range(totalBullets, 7); // rolls between X and 6, X is amout of bullets
+            Debug.Log("shooting number: " + shooting);
         }
+        
+        if (shooting == 6) // if you get shooting gets 6,  invokes the onshot event 
+        {
+            OnShot.Invoke();
+            Debug.Log("You got shot");
+        }
+        else // if miss invokes the OnBlank Event
+        {
+            OnBlank.Invoke();
+            Debug.Log("It was a blank");
+        }
+       
     }
     
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    
 }
