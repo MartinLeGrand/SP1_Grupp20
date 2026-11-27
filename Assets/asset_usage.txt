@@ -1,0 +1,7 @@
+-- add links and references to outside assets used here --
+
+AudioSlider.cs Script
+https://his.instructure.com/courses/9897/files/1553193?wrap=1
+
+AudioPlay.cs Script
+https://his.instructure.com/courses/9897/files/1553105?wrap=1
