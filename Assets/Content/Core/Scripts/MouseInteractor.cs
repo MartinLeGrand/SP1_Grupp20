@@ -2,13 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-public interface IInteractable
-{
-    void OnInteract(InputAction.CallbackContext context);
-    void OnSecondaryInteract(InputAction.CallbackContext context);
-}
-
 public class MouseInteractor : MonoBehaviour
 {
     [Header("Interaction Settings")]
@@ -24,6 +17,7 @@ public class MouseInteractor : MonoBehaviour
     private IInteractable _activeLeftInteractable;
     private IInteractable _activeRightInteractable;
     
+    private IInteractable _currentInteractableComponent;
     
     private Vector3 _mouseWorldPosition;
 
@@ -36,7 +30,7 @@ public class MouseInteractor : MonoBehaviour
 
     void Update()
     {
-        currentInteractable = GetClosestInteractibleCandidate();
+        ApplyClosestCandidate();
     }
 
     void FixedUpdate()
@@ -45,7 +39,7 @@ public class MouseInteractor : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Interactable"))
+        if (other.TryGetComponent<IInteractable>(out var interactable))
         {
             interactionCandidates.Add(other.gameObject);
         }
@@ -122,6 +116,30 @@ public class MouseInteractor : MonoBehaviour
     {
         //gameObject.transform.position = GetMouseWorldPosition(); 
         _rigidbody.MovePosition(GetMouseWorldPosition());
+    }
+
+    private void ApplyClosestCandidate()
+    {
+        GameObject newCandidate = GetClosestInteractibleCandidate();
+
+        // Nothing changed
+        if (newCandidate == currentInteractable)
+            return;
+
+        // Turn off the old one (may be null or already destroyed)
+        if (currentInteractable != null && _currentInteractableComponent != null)
+            _currentInteractableComponent.OnBecomeCurrentInteractable(false);
+
+        currentInteractable = newCandidate;
+        _currentInteractableComponent = null;
+
+        // Turn on the new one (newCandidate may be null, which is fine)
+        if (newCandidate != null &&
+            newCandidate.TryGetComponent<IInteractable>(out var interactable))
+        {
+            _currentInteractableComponent = interactable;
+            interactable.OnBecomeCurrentInteractable(true);
+        }
     }
     
     private GameObject GetClosestInteractibleCandidate()

@@ -2,13 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IHoldTarget
-{
-    void OnPickup();
-    void OnDrop();
-}
-
-
 public class PickupScript : MonoBehaviour
 {
     

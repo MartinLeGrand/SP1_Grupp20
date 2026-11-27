@@ -61,16 +61,26 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     [Header("Interaction rotation settings")]
     [SerializeField] private float torqueOnMove = 0.25f;
     [SerializeField] private float maxAngularSpeed = 12f;
+    
+    [Header("Layers")]
+    [SerializeField] private string heldLayerName = "HeldDice";
 
+    // Other GameObjects in the scene
     private MouseInteractor _mouseInteractor;
     private PickupScript _pickupScript;
     private DiceManager _diceManager;
     
+    // Other components on the dice
+    private Outline _outline;
     private Rigidbody _rb;
     private AudioSource _audioSource;
-    [HideInInspector] public int topFaceValue = -1;
+    
+    // Private variables
+    private int _topFaceValue = -1;
     private Boolean _isHeld = false;
     private float _lastDieSoundTime = -10f;
+    private int _defaultLayer;
+    private int _heldLayer;
 
     
     
@@ -78,6 +88,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     {
         _rb = GetComponent<Rigidbody>();
         _audioSource = GetComponent<AudioSource>();
+        _outline = GetComponent<Outline>();
 
         
         //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
@@ -88,6 +99,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         
         // Add itself to the dice manager list of dice
         _diceManager.AddDice(gameObject);
+        
+        // Collision layers saved
+        _defaultLayer = gameObject.layer;
+        _heldLayer = LayerMask.NameToLayer(heldLayerName);
     }
 
     private void FixedUpdate()
@@ -175,16 +190,24 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         }
     }
 
+    void IInteractable.OnBecomeCurrentInteractable(bool isNewInteractable)
+    {
+        if (_outline != null)
+            _outline.enabled = isNewInteractable;
+    }
+
     void IHoldTarget.OnPickup()
     {
         _isHeld = true;
+        SetLayerRecursive(gameObject, _heldLayer);
     }
 
     void IHoldTarget.OnDrop()
     {
-        _rb.rotation = UnityEngine.Random.rotation;
         //PlayRandomClip(throwAudioClips, 1);
+        _rb.rotation = UnityEngine.Random.rotation;
         _isHeld = false;
+        SetLayerRecursive(gameObject, _defaultLayer);
     }
     
     // Helper function to get random audio clip from an array
@@ -203,6 +226,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
                 currentTopFaceValue = face.value;
             }
         }
+        _topFaceValue = currentTopFaceValue;
         return currentTopFaceValue;
     }
 
@@ -243,6 +267,14 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     {
         _rb.AddForce(Vector3.up * forceMagnitude, ForceMode.Impulse);
         _rb.AddTorque(UnityEngine.Random.onUnitSphere * torqueMagnitude, ForceMode.Impulse);
+    }
+    
+    // Helper function for setting the layers of objects under the die, so that the mouse doesn't collide with held dice
+    private static void SetLayerRecursive(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+            SetLayerRecursive(child.gameObject, layer);
     }
 
 

@@ -12,3 +12,6 @@ https://his.instructure.com/courses/9897/files/1553105?wrap=1
 // Martin le Grand
 
 I used a combination of Gemini and Claude purely as a way to help with specific syntax. At times, I will know what kind of function I need and how I want it to work but not specifically how to write it out, in which case I will use these tools as help.
+
+Took a List sorting method from this comment on the Unity forums, it also inspired me to separate my interfaces into separate scripts. 
+https://discussions.unity.com/t/clever-way-to-shuffle-a-list-t-in-one-line-of-c-code/535113/2

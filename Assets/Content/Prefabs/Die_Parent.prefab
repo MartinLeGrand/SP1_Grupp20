@@ -16,9 +16,9 @@ GameObject:
   - component: {fileID: 2292545823756812664}
   - component: {fileID: 2535186102520624777}
   - component: {fileID: 7210171762492754361}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Die_Parent
-  m_TagString: Interactable
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -197,7 +197,7 @@ MonoBehaviour:
   minSoundInterval: 0.05
   torqueOnMove: 0.1
   maxAngularSpeed: 6
-  topFaceValue: -1
+  heldLayerName: HeldDice
 --- !u!82 &2535186102520624777
 AudioSource:
   m_ObjectHideFlags: 0
