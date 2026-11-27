@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2292545823756812664}
   - component: {fileID: 2535186102520624777}
   - component: {fileID: 7210171762492754361}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Die_Parent
   m_TagString: Interactable
   m_Icon: {fileID: 0}

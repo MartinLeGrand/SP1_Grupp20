@@ -6,7 +6,8 @@ using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Rigidbody))]
-public class DiceBehaviour : MonoBehaviour, IInteractable
+
+public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
 {
     [Serializable]
     public struct DieFaces
@@ -89,9 +90,9 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         _diceManager.AddDice(gameObject);
     }
 
-    private void OnDestroy()
+    private void FixedUpdate()
     {
-        _diceManager.RemoveDice(gameObject);
+        AddSpin();
     }
 
     private void Update()
@@ -105,11 +106,6 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         {
             Debug.Log(GetTopFaceValue());
         }
-    }
-
-    private void FixedUpdate()
-    {
-        AddSpin();
     }
     
     private void OnCollisionEnter(Collision collision)
@@ -151,17 +147,47 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
             PlayRandomClip(collisionAudioDieOnTable, volume);
         }
     }
-
-    // Helper function to get random audio clip from an array
-    private void PlayRandomClip(AudioClip[] clips, float volume)
+    private void OnDestroy()
     {
-        if (clips == null || clips.Length == 0)
-            return;
-        
-        _audioSource.pitch = Random.Range(minPitch, maxPitch);
-        
-        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
+        _diceManager.RemoveDice(gameObject);
     }
+    
+    void IInteractable.OnInteract(InputAction.CallbackContext context)
+    {
+        Debug.Log(GetTopFaceValue());
+        if (context.performed)
+        {
+            _pickupScript.Pickup(gameObject);
+        }
+
+        if (context.canceled)
+        {
+            _pickupScript.DropAll();
+        }
+    }
+
+    void IInteractable.OnSecondaryInteract(InputAction.CallbackContext context)
+    {
+        if (context.performed && _pickupScript.IsHolding)
+        {
+            _pickupScript.Pickup(gameObject);
+
+        }
+    }
+
+    void IHoldTarget.OnPickup()
+    {
+        _isHeld = true;
+    }
+
+    void IHoldTarget.OnDrop()
+    {
+        _rb.rotation = UnityEngine.Random.rotation;
+        //PlayRandomClip(throwAudioClips, 1);
+        _isHeld = false;
+    }
+    
+    // Helper function to get random audio clip from an array
 
     public int GetTopFaceValue()
     {
@@ -180,6 +206,15 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         return currentTopFaceValue;
     }
 
+    private void PlayRandomClip(AudioClip[] clips, float volume)
+    {
+        if (clips == null || clips.Length == 0)
+            return;
+        
+        _audioSource.pitch = Random.Range(minPitch, maxPitch);
+        
+        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
+    }
     private void AddSpin()
     {
         if (!_isHeld || _rb.IsSleeping())
@@ -200,24 +235,6 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         if (_rb.angularVelocity.sqrMagnitude > maxAngularSpeed * maxAngularSpeed)
         {
             _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularSpeed;
-        }
-    }
-
-    void IInteractable.OnInteract(InputAction.CallbackContext context)
-    {
-        Debug.Log(GetTopFaceValue());
-        if (context.performed)
-        {
-            _pickupScript.Pickup(gameObject);
-            _isHeld = true;
-        }
-
-        if (context.canceled)
-        {
-            _rb.rotation = UnityEngine.Random.rotation;
-            _pickupScript.Drop(gameObject);
-            PlayRandomClip(throwAudioClips, 1);
-            _isHeld = false;
         }
     }
     
