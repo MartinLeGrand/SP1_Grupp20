@@ -4,7 +4,7 @@ using UnityEditor;
 
 public class DiceManager : MonoBehaviour
 {   
-    List<GameObject> allObjects = new List<GameObject>();
+    List<GameObject> allDice = new List<GameObject>();
     private DiceBehaviour _diceBehaviour;
     private TargetManager _targetScore;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -17,7 +17,7 @@ public class DiceManager : MonoBehaviour
     public void CountTotal()
     {
         int total = 0;
-        foreach (GameObject go in allObjects)
+        foreach (GameObject go in allDice)
         {
             _diceBehaviour = go.GetComponent<DiceBehaviour>();
             total += _diceBehaviour.GetTopFaceValue();
@@ -27,13 +27,13 @@ public class DiceManager : MonoBehaviour
     
     public void AddDice(GameObject go)
     {
-        allObjects.Add(go);
+        allDice.Add(go);
         Debug.Log("Dice added: " + go.name);
     }
 
     public void RemoveDice(GameObject go)
     {
-        allObjects.Remove(go);
+        allDice.Remove(go);
         Debug.Log("Dice removed: " + go.name);
     }
     

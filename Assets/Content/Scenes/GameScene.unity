@@ -160,7 +160,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 63079127}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 36be489d1b1a0e34fa357b646482aaeb, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -242,7 +242,7 @@ GameObject:
   - component: {fileID: 66601261}
   - component: {fileID: 66601262}
   - component: {fileID: 66601263}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: DiceBag
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -258,11 +258,12 @@ Transform:
   m_GameObject: {fileID: 66601260}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.242, y: 0.283, z: -0.882}
+  m_LocalPosition: {x: 1.242, y: 0.008, z: -0.882}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1265212500}
+  - {fileID: 365620212}
   m_Father: {fileID: 1856441034}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &66601262
@@ -302,7 +303,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 0.3
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &355319825
 GameObject:
@@ -373,6 +374,37 @@ Transform:
   - {fileID: 797621744}
   - {fileID: 406586996}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &365620211
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 365620212}
+  m_Layer: 0
+  m_Name: DiceSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &365620212
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365620211}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.3, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 66601261}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &406586995
 PrefabInstance:
@@ -683,7 +715,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 769870891}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 36be489d1b1a0e34fa357b646482aaeb, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -857,7 +889,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 945885972}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 36be489d1b1a0e34fa357b646482aaeb, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1001,7 +1033,7 @@ BoxCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1173783807}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: 36be489d1b1a0e34fa357b646482aaeb, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1193,7 +1225,7 @@ GameObject:
   - component: {fileID: 1265212502}
   - component: {fileID: 1265212501}
   - component: {fileID: 1265212504}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1209,7 +1241,7 @@ Transform:
   m_GameObject: {fileID: 1265212499}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.194, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -1893,6 +1925,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1226402966}
     m_Modifications:
+    - target: {fileID: 3934801111181387871, guid: 53ca29836e934f048a0dfeb7092bcdd1, type: 3}
+      propertyPath: m_Radius
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5981868341371878281, guid: 53ca29836e934f048a0dfeb7092bcdd1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 5981868341371878281, guid: 53ca29836e934f048a0dfeb7092bcdd1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 5981868341371878281, guid: 53ca29836e934f048a0dfeb7092bcdd1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.025
+      objectReference: {fileID: 0}
     - target: {fileID: 6264822493319544909, guid: 53ca29836e934f048a0dfeb7092bcdd1, type: 3}
       propertyPath: m_Name
       value: MouseInteractor

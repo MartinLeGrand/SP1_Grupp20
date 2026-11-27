@@ -10,9 +10,19 @@ public class DiceBag : MonoBehaviour, IInteractable
     
     [Header("References")]
     [SerializeField] private Outline _outline;
-    void Start()
+
+    // Other GameObjects in the scene
+    private PickupScript _pickupScript;
+    
+    // Other components on the dice
+    private GameObject _diceSpawnPoint;
+    void Awake()
     {
+        _diceSpawnPoint = GameObject.Find("DiceSpawnPoint");
         
+        
+        //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
+        _pickupScript = FindFirstObjectByType<PickupScript>();
     }
 
     // Update is called once per frame
@@ -23,12 +33,16 @@ public class DiceBag : MonoBehaviour, IInteractable
 
     public void OnInteract(InputAction.CallbackContext context)
     {
-        throw new System.NotImplementedException();
+        if (context.performed)
+            DrawDieFromBag();
+        else if (context.canceled)
+            _pickupScript.DropAll();
     }
 
     public void OnSecondaryInteract(InputAction.CallbackContext context)
     {
-        throw new System.NotImplementedException();
+        if (context.performed && _pickupScript.IsHolding)
+            DrawDieFromBag();
     }
 
     public void OnBecomeCurrentInteractable(bool isInteractable)
@@ -37,8 +51,21 @@ public class DiceBag : MonoBehaviour, IInteractable
             _outline.enabled = isInteractable;
     }
 
+    public void DrawDieFromBag()
+    {
+        if (dice.Count > 0)
+        {
+            GameObject prefab = dice[0];
+            dice.RemoveAt(0);
+            
+            GameObject die = Instantiate(prefab, _diceSpawnPoint.transform.position, _diceSpawnPoint.transform.rotation);
+            _pickupScript.Pickup(die);
+        }
+    }
+    
     public void ShuffleDice()
     {
-        throw new System.NotImplementedException();
+        // This method was stolen from a comment on the Unity forums, it's stored in Assets/Content/Core/Tools/ListFunctions.cs
+        dice.Shuffle();
     }
 }

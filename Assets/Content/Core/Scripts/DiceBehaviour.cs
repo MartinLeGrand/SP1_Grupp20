@@ -15,6 +15,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         public int value;
         public Vector3 localNormal;
     }
+
+    [Header("THIS DIE")] 
+    [Tooltip("This is the die that gets put in the bag when this die is dropped on top of it.")]
+    [SerializeField] private GameObject diePrefab;
     
     [Header("References")]
     [SerializeField] private PhysicsMaterial diceMaterial;
@@ -114,7 +118,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            TossDice(UnityEngine.Random.Range(2f, 4f), UnityEngine.Random.Range(5f, 10f));
+            TossDice(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1f, 2f));
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
