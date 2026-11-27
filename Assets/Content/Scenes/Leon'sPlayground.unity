@@ -455,9 +455,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8740477531770539522, guid: 0b44b042ee7377d41a0ed4b61b44cb00, type: 3}
+      propertyPath: Loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8740477531770539522, guid: 0b44b042ee7377d41a0ed4b61b44cb00, type: 3}
       propertyPath: m_Volume
       value: 0.2
       objectReference: {fileID: 0}
+    - target: {fileID: 8740477531770539522, guid: 0b44b042ee7377d41a0ed4b61b44cb00, type: 3}
+      propertyPath: m_Resource
+      value: 
+      objectReference: {fileID: 8300000, guid: 929858629f9142b418aa5eafc5fd4eb0, type: 3}
     - target: {fileID: 8740477531770539522, guid: 0b44b042ee7377d41a0ed4b61b44cb00, type: 3}
       propertyPath: m_PlayOnAwake
       value: 1
