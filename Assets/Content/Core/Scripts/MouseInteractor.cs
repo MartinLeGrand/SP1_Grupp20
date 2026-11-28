@@ -2,66 +2,105 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
-public interface IInteractable
-{
-    void OnInteract(InputAction.CallbackContext context);
-}
-
 public class MouseInteractor : MonoBehaviour
 {
-    private Camera _camera;
-    private Rigidbody _rigidbody;
-    private IInteractable _activeInteractable;
-    private Vector3 _mouseWorldPosition;
-    
     [Header("Interaction Settings")]
     public bool followMouse = true;
     [Tooltip("Which collision layers block the mouse and along with that the collision sphere?")]
     [SerializeField] private LayerMask mouseBlockLayer;
     [SerializeField] private List<GameObject> interactionCandidates;
     [SerializeField] private GameObject currentInteractable;
+    
+    private Camera _camera;
+    private Rigidbody _rigidbody;
+    private PickupScript _pickupScript;
+    private IInteractable _activeLeftInteractable;
+    private IInteractable _activeRightInteractable;
+    
+    private IInteractable _currentInteractableComponent;
+    
+    private Vector3 _mouseWorldPosition;
 
     void Awake()
     {
         _camera = Camera.main;
         _rigidbody = GetComponent<Rigidbody>();
+        _pickupScript = GetComponent<PickupScript>();
     }
 
     void Update()
     {
-        currentInteractable = GetClosestInteractibleCandidate();
+        ApplyClosestCandidate();
     }
 
     void FixedUpdate()
     {
         SetInteractionSpherePosition();
     }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent<IInteractable>(out var interactable))
+        {
+            interactionCandidates.Add(other.gameObject);
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (interactionCandidates.Contains(other.gameObject))
+        {
+            interactionCandidates.Remove(other.gameObject);
+        }
+    }
     
     public void OnLeftClick(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            _activeInteractable = null;
+            _activeLeftInteractable = null;
 
-            if (currentInteractable != null && currentInteractable.TryGetComponent<IInteractable>(out var interactable))
+            if (currentInteractable != null &&
+                currentInteractable.TryGetComponent<IInteractable>(out var interactable))
             {
-                _activeInteractable = interactable;
-                _activeInteractable.OnInteract(context);
+                _activeLeftInteractable = interactable;
+                _activeLeftInteractable.OnInteract(context);
             }
         }
         else if (context.performed)
         {
-            _activeInteractable?.OnInteract(context);
+            _activeLeftInteractable?.OnInteract(context);
         }
         else if (context.canceled)
         {
-            _activeInteractable?.OnInteract(context);
-            _activeInteractable = null;
+            _activeLeftInteractable?.OnInteract(context);
+            _activeLeftInteractable = null;
         }
     }
 
-    Vector3 GetMouseWorldPosition()
+    public void OnRightClick(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            _activeRightInteractable = null;
+
+            if (currentInteractable != null &&
+                currentInteractable.TryGetComponent<IInteractable>(out var interactable))
+            {
+                _activeRightInteractable = interactable;
+                _activeRightInteractable.OnSecondaryInteract(context);
+            }
+        }
+        else if (context.performed)
+        {
+            _activeRightInteractable?.OnSecondaryInteract(context);
+        }
+        else if (context.canceled)
+        {
+            _activeRightInteractable?.OnSecondaryInteract(context);
+            _activeRightInteractable = null;
+        }
+    }
+
+    private Vector3 GetMouseWorldPosition()
     {
         RaycastHit hit;
         Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
@@ -73,28 +112,36 @@ public class MouseInteractor : MonoBehaviour
         return _mouseWorldPosition;
     }
     
-    void SetInteractionSpherePosition()
+    private void SetInteractionSpherePosition()
     {
         //gameObject.transform.position = GetMouseWorldPosition(); 
         _rigidbody.MovePosition(GetMouseWorldPosition());
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void ApplyClosestCandidate()
     {
-        if (other.CompareTag("Interactable"))
+        GameObject newCandidate = GetClosestInteractibleCandidate();
+
+        // Nothing changed
+        if (newCandidate == currentInteractable)
+            return;
+
+        // Turn off the old one (may be null or already destroyed)
+        if (currentInteractable != null && _currentInteractableComponent != null)
+            _currentInteractableComponent.OnBecomeCurrentInteractable(false);
+
+        currentInteractable = newCandidate;
+        _currentInteractableComponent = null;
+
+        // Turn on the new one (newCandidate may be null, which is fine)
+        if (newCandidate != null &&
+            newCandidate.TryGetComponent<IInteractable>(out var interactable))
         {
-            interactionCandidates.Add(other.gameObject);
+            _currentInteractableComponent = interactable;
+            interactable.OnBecomeCurrentInteractable(true);
         }
     }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (interactionCandidates.Contains(other.gameObject))
-        {
-            interactionCandidates.Remove(other.gameObject);
-        }
-    }
-
+    
     private GameObject GetClosestInteractibleCandidate()
     {
         float closestDistance = float.MaxValue;

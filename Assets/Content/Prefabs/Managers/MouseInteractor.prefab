@@ -266,7 +266,7 @@ MonoBehaviour:
   followMouse: 1
   mouseBlockLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 192
   interactionCandidates: []
   currentInteractable: {fileID: 0}
 --- !u!114 &6372625838183317739
@@ -298,13 +298,13 @@ SphereCollider:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
   m_LayerOverridePriority: 0
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.15
+  m_Radius: 0.1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &9170525115897387488
 Rigidbody:
@@ -374,6 +374,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 48723430-1804-406f-bb57-cde868818021
     m_ActionName: 'Player/Interact[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5475728027909534395}
+        m_TargetAssemblyTypeName: MouseInteractor, Assembly-CSharp
+        m_MethodName: OnRightClick
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 796cf8be-d059-483f-8fdf-c0a37814c237
+    m_ActionName: 'Player/Secondary Interact[/Mouse/rightButton]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

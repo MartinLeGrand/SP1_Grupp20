@@ -6,7 +6,8 @@ using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 [RequireComponent(typeof(Rigidbody))]
-public class DiceBehaviour : MonoBehaviour, IInteractable
+
+public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
 {
     [Serializable]
     public struct DieFaces
@@ -14,6 +15,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         public int value;
         public Vector3 localNormal;
     }
+
+    [Header("THIS DIE")] 
+    [Tooltip("This is the die that gets put in the bag when this die is dropped on top of it.")]
+    [SerializeField] private GameObject diePrefab;
     
     [Header("References")]
     [SerializeField] private PhysicsMaterial diceMaterial;
@@ -60,16 +65,26 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     [Header("Interaction rotation settings")]
     [SerializeField] private float torqueOnMove = 0.25f;
     [SerializeField] private float maxAngularSpeed = 12f;
+    
+    [Header("Layers")]
+    [SerializeField] private string heldLayerName = "HeldDice";
 
+    // Other GameObjects in the scene
     private MouseInteractor _mouseInteractor;
     private PickupScript _pickupScript;
     private DiceManager _diceManager;
     
+    // Other components on the dice
+    private Outline _outline;
     private Rigidbody _rb;
     private AudioSource _audioSource;
-    [HideInInspector] public int topFaceValue = -1;
+    
+    // Private variables
+    private int _topFaceValue = -1;
     private Boolean _isHeld = false;
     private float _lastDieSoundTime = -10f;
+    private int _defaultLayer;
+    private int _heldLayer;
 
     
     
@@ -77,6 +92,7 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
     {
         _rb = GetComponent<Rigidbody>();
         _audioSource = GetComponent<AudioSource>();
+        _outline = GetComponent<Outline>();
 
         
         //Make DAMN sure there is never another one of these fuckass scripts in the world or ill bite your face off
@@ -87,29 +103,28 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
         
         // Add itself to the dice manager list of dice
         _diceManager.AddDice(gameObject);
+        
+        // Collision layers saved
+        _defaultLayer = gameObject.layer;
+        _heldLayer = LayerMask.NameToLayer(heldLayerName);
     }
 
-    private void OnDestroy()
+    private void FixedUpdate()
     {
-        _diceManager.RemoveDice(gameObject);
+        AddSpin();
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
         {
-            TossDice(UnityEngine.Random.Range(2f, 4f), UnityEngine.Random.Range(5f, 10f));
+            TossDice(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1f, 2f));
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Debug.Log(GetTopFaceValue());
         }
-    }
-
-    private void FixedUpdate()
-    {
-        AddSpin();
     }
     
     private void OnCollisionEnter(Collision collision)
@@ -151,17 +166,55 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
             PlayRandomClip(collisionAudioDieOnTable, volume);
         }
     }
-
-    // Helper function to get random audio clip from an array
-    private void PlayRandomClip(AudioClip[] clips, float volume)
+    private void OnDestroy()
     {
-        if (clips == null || clips.Length == 0)
-            return;
-        
-        _audioSource.pitch = Random.Range(minPitch, maxPitch);
-        
-        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
+        _diceManager.RemoveDice(gameObject);
     }
+    
+    void IInteractable.OnInteract(InputAction.CallbackContext context)
+    {
+        Debug.Log(GetTopFaceValue());
+        if (context.performed)
+        {
+            _pickupScript.Pickup(gameObject);
+        }
+
+        if (context.canceled)
+        {
+            _pickupScript.DropAll();
+        }
+    }
+
+    void IInteractable.OnSecondaryInteract(InputAction.CallbackContext context)
+    {
+        if (context.performed && _pickupScript.IsHolding)
+        {
+            _pickupScript.Pickup(gameObject);
+
+        }
+    }
+
+    void IInteractable.OnBecomeCurrentInteractable(bool isNewInteractable)
+    {
+        if (_outline != null)
+            _outline.enabled = isNewInteractable;
+    }
+
+    void IHoldTarget.OnPickup()
+    {
+        _isHeld = true;
+        SetLayerRecursive(gameObject, _heldLayer);
+    }
+
+    void IHoldTarget.OnDrop()
+    {
+        //PlayRandomClip(throwAudioClips, 1);
+        _rb.rotation = UnityEngine.Random.rotation;
+        _isHeld = false;
+        SetLayerRecursive(gameObject, _defaultLayer);
+    }
+    
+    // Helper function to get random audio clip from an array
 
     public int GetTopFaceValue()
     {
@@ -177,9 +230,19 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
                 currentTopFaceValue = face.value;
             }
         }
+        _topFaceValue = currentTopFaceValue;
         return currentTopFaceValue;
     }
 
+    private void PlayRandomClip(AudioClip[] clips, float volume)
+    {
+        if (clips == null || clips.Length == 0)
+            return;
+        
+        _audioSource.pitch = Random.Range(minPitch, maxPitch);
+        
+        _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
+    }
     private void AddSpin()
     {
         if (!_isHeld || _rb.IsSleeping())
@@ -202,30 +265,20 @@ public class DiceBehaviour : MonoBehaviour, IInteractable
             _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularSpeed;
         }
     }
-
-    void IInteractable.OnInteract(InputAction.CallbackContext context)
-    {
-        Debug.Log(GetTopFaceValue());
-        if (context.performed)
-        {
-            _pickupScript.Pickup(gameObject);
-            _isHeld = true;
-        }
-
-        if (context.canceled)
-        {
-            _rb.rotation = UnityEngine.Random.rotation;
-            _pickupScript.Drop(gameObject);
-            PlayRandomClip(throwAudioClips, 1);
-            _isHeld = false;
-        }
-    }
     
     //Debug function that tosses the dice up to randomize the value somewhat
     public void TossDice(float forceMagnitude, float torqueMagnitude)
     {
         _rb.AddForce(Vector3.up * forceMagnitude, ForceMode.Impulse);
         _rb.AddTorque(UnityEngine.Random.onUnitSphere * torqueMagnitude, ForceMode.Impulse);
+    }
+    
+    // Helper function for setting the layers of objects under the die, so that the mouse doesn't collide with held dice
+    private static void SetLayerRecursive(GameObject obj, int layer)
+    {
+        obj.layer = layer;
+        foreach (Transform child in obj.transform)
+            SetLayerRecursive(child.gameObject, layer);
     }
 
 

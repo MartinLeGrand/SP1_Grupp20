@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class PickupScript : MonoBehaviour
 {
+    
     [SerializeField] private List<GameObject> heldObjects;
     [SerializeField] private List<Rigidbody> heldObjectRigidbodies;
+    
+    // Other scripts can get these values to check if anything is being held or if a specific object is held
+    public bool IsHolding => heldObjects.Count > 0;
+    public bool IsHeld(GameObject obj) => heldObjects.Contains(obj);
+    
     private GameObject _holdTarget;
     
     [SerializeField] private float lerpSpeed = 12f;
@@ -18,14 +24,41 @@ public class PickupScript : MonoBehaviour
 
     public void Pickup(GameObject heldObject)
     {
-        heldObjects.Add(heldObject);
-        heldObjectRigidbodies.Add(heldObject.GetComponent<Rigidbody>());
+        if (heldObject == null || heldObjects.Contains(heldObject))
+            return;
+
+        if (heldObject.TryGetComponent<IHoldTarget>(out var holdTarget))
+        {
+            heldObjects.Add(heldObject);
+            heldObjectRigidbodies.Add(heldObject.GetComponent<Rigidbody>());
+            holdTarget.OnPickup();
+        }
     }
 
     public void Drop(GameObject heldObject)
     {
-        heldObjects.Remove(heldObject);
-        heldObjectRigidbodies.Remove(heldObject.GetComponent<Rigidbody>());
+        if (heldObject != null && heldObject.TryGetComponent<IHoldTarget>(out var holdTarget))
+        {
+            heldObjects.Remove(heldObject);
+            heldObjectRigidbodies.Remove(heldObject.GetComponent<Rigidbody>());
+            holdTarget.OnDrop();
+        }
+    }
+
+    public void DropAll()
+    {
+        // Iterate backwards so we can safely modify the list
+        for (int i = heldObjects.Count - 1; i >= 0; i--)
+        {
+            GameObject obj = heldObjects[i];
+            if (obj != null && obj.TryGetComponent<IHoldTarget>(out var holdTarget))
+            {
+                holdTarget.OnDrop();
+            }
+        }
+
+        heldObjects.Clear();
+        heldObjectRigidbodies.Clear();
     }
     
     private void FixedUpdate()
