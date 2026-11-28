@@ -25,12 +25,6 @@ public class DiceBag : MonoBehaviour, IInteractable
         _pickupScript = FindFirstObjectByType<PickupScript>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -53,17 +47,23 @@ public class DiceBag : MonoBehaviour, IInteractable
 
     public void DrawDieFromBag()
     {
-        if (dice.Count > 0)
-        {
-            GameObject prefab = dice[0];
-            dice.RemoveAt(0);
-            
-            GameObject die = Instantiate(prefab, _diceSpawnPoint.transform.position, _diceSpawnPoint.transform.rotation);
-            _pickupScript.Pickup(die);
-        }
+        if (dice.Count == 0)
+            return;
+        
+        GameObject prefab = dice[0];
+        dice.RemoveAt(0);
+        
+        GameObject die = Instantiate(prefab, _diceSpawnPoint.transform.position, _diceSpawnPoint.transform.rotation);
+
+        if (die.TryGetComponent<DiceBehaviour>(out var diceBehaviour))
+            diceBehaviour.SetDieFresh(true);
+
+        _pickupScript.Pickup(die);
+        
+        ShuffleBag();
     }
     
-    public void ShuffleDice()
+    public void ShuffleBag()
     {
         // This method was stolen from a comment on the Unity forums, it's stored in Assets/Content/Core/Tools/ListFunctions.cs
         dice.Shuffle();

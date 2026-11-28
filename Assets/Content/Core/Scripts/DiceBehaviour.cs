@@ -16,6 +16,28 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         public Vector3 localNormal;
     }
 
+    [Serializable]
+    public struct DieResult
+    {
+        public int value;
+        public float dot;
+        
+        public DieResult(int value, float dot)
+        {
+            this.value = value;
+            this.dot = dot;
+        }
+    }
+    
+    public enum DieState
+    {
+        Held,
+        Rolling,
+        Settled,
+        NeedsReroll,
+        Locked
+    }
+
     [Header("THIS DIE")] 
     [Tooltip("This is the die that gets put in the bag when this die is dropped on top of it.")]
     [SerializeField] private GameObject diePrefab;
@@ -35,6 +57,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         new DieFaces {value = 3, localNormal = Vector3.forward},
         new DieFaces {value = 4, localNormal = Vector3.back}
     };
+
+    [Header("Dice Behaviour")] 
+    [Tooltip("The tolerance for when a die counts as cocked. Measured in degrees that the top face is away from facing straight up.")]
+    [SerializeField] private float maxTiltDegrees = 5f;
 
     [Header("Audio")]
     [SerializeField] private AudioClip[] collisionAudioDieOnDie;
@@ -81,10 +107,19 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     
     // Private variables
     private int _topFaceValue = -1;
-    private Boolean _isHeld = false;
     private float _lastDieSoundTime = -10f;
     private int _defaultLayer;
     private int _heldLayer;
+
+    private DieState _dieState = DieState.Rolling;
+    
+    
+    // We mark certain die as "fresh" so that we can stop the player from mixing them with normal die.
+    // The point of this is to avoid wacky interactions where the player picks up a die from the table,
+    // then a die from the bag, then tries to put both back in the bag.
+    
+    // IsFresh can be gotten by everyone, but set only by this script
+    public bool IsFresh { get; private set; }
 
     
     
@@ -111,20 +146,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
 
     private void FixedUpdate()
     {
-        AddSpin();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TossDice(UnityEngine.Random.Range(0.4f, 0.8f), UnityEngine.Random.Range(1f, 2f));
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Debug.Log(GetTopFaceValue());
-        }
+        if (_dieState == DieState.Held)
+            AddSpin();
+        
+        CheckIfLanded();
     }
     
     private void OnCollisionEnter(Collision collision)
@@ -168,12 +193,13 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
     }
     private void OnDestroy()
     {
+        if (_diceManager == null) return;
         _diceManager.RemoveDice(gameObject);
+        _diceManager.RemoveSettledDieValue(gameObject);
     }
     
     void IInteractable.OnInteract(InputAction.CallbackContext context)
-    {
-        Debug.Log(GetTopFaceValue());
+    { 
         if (context.performed)
         {
             _pickupScript.Pickup(gameObject);
@@ -202,21 +228,49 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
 
     void IHoldTarget.OnPickup()
     {
-        _isHeld = true;
-        SetLayerRecursive(gameObject, _heldLayer);
+        SetDieState(DieState.Held);
     }
 
     void IHoldTarget.OnDrop()
     {
         //PlayRandomClip(throwAudioClips, 1);
         _rb.rotation = UnityEngine.Random.rotation;
-        _isHeld = false;
-        SetLayerRecursive(gameObject, _defaultLayer);
+        SetDieState(DieState.Rolling);
+    }
+
+    public void SetDieState(DieState state)
+    {
+        if (_dieState == state) return;
+        
+        DieState previousState = state;
+        _dieState = state;
+        
+        switch (state)
+        {
+            case DieState.Held:
+                SetLayerRecursive(gameObject, _heldLayer);
+                _diceManager.RemoveSettledDieValue(gameObject);
+                break;
+            case DieState.Locked:
+                
+                break;
+            case DieState.NeedsReroll:
+                
+                break;
+            case DieState.Rolling:
+                _diceManager.RemoveSettledDieValue(gameObject);
+                _rb.WakeUp();
+                SetLayerRecursive(gameObject, _defaultLayer);
+                
+                break;
+            case DieState.Settled:
+                IsFresh = false;
+                _diceManager.AddSettledDieValue(gameObject, _topFaceValue);
+                break;
+        }
     }
     
-    // Helper function to get random audio clip from an array
-
-    public int GetTopFaceValue()
+    public DieResult ReadTopFace()
     {
         float maxDot = float.MinValue;
         int currentTopFaceValue = -1;
@@ -230,10 +284,23 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
                 currentTopFaceValue = face.value;
             }
         }
-        _topFaceValue = currentTopFaceValue;
-        return currentTopFaceValue;
+
+        return new DieResult(currentTopFaceValue, maxDot);
+    }
+    
+    //Debug function that tosses the dice up to randomize the value somewhat
+    public void TossDice(float forceMagnitude, float torqueMagnitude)
+    {
+        _rb.AddForce(Vector3.up * forceMagnitude, ForceMode.Impulse);
+        _rb.AddTorque(UnityEngine.Random.onUnitSphere * torqueMagnitude, ForceMode.Impulse);
     }
 
+    public void SetDieFresh(bool fresh)
+    {
+        IsFresh = fresh;
+    }
+
+    // Helper function to get random audio clip from an array
     private void PlayRandomClip(AudioClip[] clips, float volume)
     {
         if (clips == null || clips.Length == 0)
@@ -243,9 +310,10 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         
         _audioSource.PlayOneShot(clips[Random.Range(0, clips.Length)], Mathf.Clamp01(volume));
     }
+    
     private void AddSpin()
     {
-        if (!_isHeld || _rb.IsSleeping())
+        if (_dieState != DieState.Held || _rb.IsSleeping())
             return;
 
         Vector3 flatVelocity = new Vector3(_rb.linearVelocity.x, 0f, _rb.linearVelocity.z);
@@ -265,12 +333,48 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
             _rb.angularVelocity = _rb.angularVelocity.normalized * maxAngularSpeed;
         }
     }
-    
-    //Debug function that tosses the dice up to randomize the value somewhat
-    public void TossDice(float forceMagnitude, float torqueMagnitude)
+
+    private void CheckIfLanded()
     {
-        _rb.AddForce(Vector3.up * forceMagnitude, ForceMode.Impulse);
-        _rb.AddTorque(UnityEngine.Random.onUnitSphere * torqueMagnitude, ForceMode.Impulse);
+        switch (_dieState)
+        {
+            // while dice is rolling, check if the rigid body falls asleep, and if it does,
+            // EvaluateLanding.
+            case DieState.Rolling:
+                if (_rb.IsSleeping())
+                    EvaluateLanding();
+                break;
+            
+            // While the dice is settled, if the rigidbody wakes up, set the state to rolling.
+            // We probably got knocked into.
+            case DieState.Settled:
+                if (!_rb.IsSleeping())
+                    SetDieState(DieState.Rolling);
+                break;
+        }
+    }
+
+    private bool CheckIfCocked(float chosenFaceDot)
+    {
+        if (chosenFaceDot < Mathf.Cos(maxTiltDegrees * Mathf.Deg2Rad))
+            return true;
+        
+        return false;
+    }
+
+    private bool EvaluateLanding()
+    {
+        DieResult result = ReadTopFace();
+        _topFaceValue = result.value;
+
+        if (CheckIfCocked(result.dot))
+        {
+            Debug.Log("Die landed cocked!");
+            SetDieState(DieState.NeedsReroll);
+            return false;
+        }
+        SetDieState(DieState.Settled);
+        return true;
     }
     
     // Helper function for setting the layers of objects under the die, so that the mouse doesn't collide with held dice
@@ -280,6 +384,4 @@ public class DiceBehaviour : MonoBehaviour, IInteractable, IHoldTarget
         foreach (Transform child in obj.transform)
             SetLayerRecursive(child.gameObject, layer);
     }
-
-
 }

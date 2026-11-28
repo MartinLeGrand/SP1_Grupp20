@@ -4,13 +4,14 @@ using UnityEditor;
 
 public class DiceManager : MonoBehaviour
 {   
+    private Dictionary<GameObject, int> SettledDice = new Dictionary<GameObject, int>();
+    
     List<GameObject> allDice = new List<GameObject>();
     private DiceBehaviour _diceBehaviour;
     private TargetManager _targetScore;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    void Awake()
     {
-        // should ever only exist one Dicemanager
         _targetScore = FindFirstObjectByType<TargetManager>();
     }
 
@@ -20,7 +21,7 @@ public class DiceManager : MonoBehaviour
         foreach (GameObject go in allDice)
         {
             _diceBehaviour = go.GetComponent<DiceBehaviour>();
-            total += _diceBehaviour.GetTopFaceValue();
+            total += _diceBehaviour.ReadTopFace().value;
         }
         _targetScore.AddToDiceTotal(total);
     }
@@ -36,5 +37,15 @@ public class DiceManager : MonoBehaviour
         allDice.Remove(go);
         Debug.Log("Dice removed: " + go.name);
     }
-    
+
+    public void AddSettledDieValue(GameObject die, int value)
+    {
+        SettledDice.Add(die, value);
+        Debug.Log(die + " Rolled " + value);
+    }
+
+    public void RemoveSettledDieValue(GameObject die)
+    {
+        SettledDice.Remove(die);
+    }
 }
