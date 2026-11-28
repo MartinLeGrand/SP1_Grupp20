@@ -6,9 +6,18 @@ using Random = UnityEngine.Random;
 public class RevolverSystem : MonoBehaviour
 {
     private int totalBullets;
+    private AudioSource _audioSource;
 
+    public AudioClip blankClip;
+    public AudioClip shotClip;
+    
     public UnityEvent OnBlank;
     public UnityEvent OnShot;
+
+    private void Awake()
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
 
     public void LoadRevolver() // loads the revolver with a shot
     {
@@ -42,11 +51,13 @@ public class RevolverSystem : MonoBehaviour
         if (shooting == 6) // if you get shooting gets 6,  invokes the onshot event 
         {
             OnShot.Invoke();
+            _audioSource.PlayOneShot(shotClip);
             Debug.Log("You got shot");
         }
         else // if miss invokes the OnBlank Event
         {
             OnBlank.Invoke();
+            _audioSource.PlayOneShot(blankClip);
             Debug.Log("It was a blank");
         }
        
